@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manthan AI — Login</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;800&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#05050d;--bg2:#0e0e1a;--bg3:#141424;
+  --line:#1e1e30;--g:#00ffa3;--g2:#00cc82;
+  --b:#00c2ff;--p:#9d6fff;--r:#ff4d6d;
+  --txt:#e2e2f0;--dim:#454568;
+}
+body{
+  font-family:'JetBrains Mono',monospace;
+  background:var(--bg);color:var(--txt);
+  min-height:100vh;display:flex;
+  align-items:center;justify-content:center;
+  padding:20px;position:relative;overflow:hidden;
+}
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(0,255,163,0.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,255,163,0.03) 1px,transparent 1px);
+  background-size:32px 32px;pointer-events:none;
+}
+.orb{position:fixed;border-radius:50%;filter:blur(100px);pointer-events:none;opacity:0.1}
+.o1{width:400px;height:400px;background:var(--g);top:-150px;left:-150px;animation:of 12s ease-in-out infinite}
+.o2{width:350px;height:350px;background:var(--b);bottom:-100px;right:-100px;animation:of 15s ease-in-out infinite reverse}
+@keyframes of{0%,100%{transform:translate(0,0)}50%{transform:translate(20px,-15px)}}
+
+/* Card */
+.card{
+  position:relative;z-index:1;
+  width:100%;max-width:420px;
+  background:var(--bg2);
+  border:1px solid var(--line);
+  border-radius:20px;
+  padding:40px 36px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.5);
+  animation:fadeUp 0.6s ease-out;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+/* Logo */
+.logo{text-align:center;margin-bottom:32px}
+.logo-box{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:64px;height:64px;
+  background:#00ffa312;
+  border:1px solid var(--g);
+  border-radius:16px;
+  font-family:'Syne',sans-serif;
+  font-size:28px;font-weight:800;color:var(--g);
+  margin-bottom:14px;
+  box-shadow:0 0 30px #00ffa320;
+  position:relative;
+}
+.logo-ring{
+  position:absolute;width:88px;height:88px;
+  border:1px solid #00ffa318;border-radius:50%;
+  animation:spin 8s linear infinite;
+}
+.logo-ring::after{
+  content:'';position:absolute;
+  width:6px;height:6px;background:var(--g);
+  border-radius:50%;top:-3px;left:50%;
+  transform:translateX(-50%);
+  box-shadow:0 0 8px var(--g);
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.logo h1{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--g);letter-spacing:2px}
+.logo p{font-size:10px;color:var(--dim);margin-top:4px;letter-spacing:1px}
+
+/* Steps */
+.steps{display:flex;gap:6px;margin-bottom:28px}
+.step{
+  flex:1;height:3px;border-radius:3px;
+  background:var(--line);transition:background 0.3s;
+}
+.step.done{background:var(--g)}
+.step.active{background:var(--g);opacity:0.5}
+
+/* Panels */
+.panel{display:none;animation:fadeUp 0.3s ease-out}
+.panel.show{display:block}
+
+/* Labels */
+.lbl{font-size:10px;color:var(--dim);letter-spacing:1px;margin-bottom:6px;display:block}
+
+/* Input */
+.inp{
+  width:100%;padding:12px 14px;
+  background:var(--bg3);color:var(--txt);
+  border:1px solid var(--line);border-radius:10px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:13px;outline:none;
+  transition:border-color 0.15s;
+  margin-bottom:16px;
+}
+.inp:focus{border-color:#00ffa340}
+.inp::placeholder{color:var(--dim)}
+
+/* OTP inputs */
+.otp-row{display:flex;gap:8px;margin-bottom:16px}
+.otp-inp{
+  flex:1;height:52px;
+  background:var(--bg3);color:var(--g);
+  border:1px solid var(--line);border-radius:10px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:22px;font-weight:800;
+  text-align:center;outline:none;
+  transition:all 0.15s;
+  min-width:0;
+}
+.otp-inp:focus{border-color:var(--g);box-shadow:0 0 10px #00ffa320}
+
+/* Button */
+.btn{
+  width:100%;padding:13px;
+  background:var(--g);color:#000;
+  border:none;border-radius:10px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:13px;font-weight:800;
+  cursor:pointer;letter-spacing:1px;
+  transition:all 0.2s;position:relative;overflow:hidden;
+}
+.btn::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);
+  transform:translateX(-100%);transition:transform 0.4s;
+}
+.btn:hover::before{transform:translateX(100%)}
+.btn:hover{background:var(--g2);transform:translateY(-1px)}
+.btn:disabled{background:var(--dim);color:#333;cursor:not-allowed;transform:none}
+
+/* Status msg */
+.status{
+  font-size:11px;text-align:center;
+  padding:8px 12px;border-radius:8px;
+  margin-bottom:14px;display:none;
+}
+.status.ok{background:#00ffa312;border:1px solid #00ffa330;color:var(--g)}
+.status.err{background:#ff4d6d12;border:1px solid #ff4d6d30;color:var(--r)}
+
+/* Resend */
+.resend{
+  text-align:center;margin-top:14px;
+  font-size:11px;color:var(--dim);
+}
+.resend span{color:var(--b);cursor:pointer;transition:color 0.15s}
+.resend span:hover{color:#fff}
+
+/* Email display */
+.email-disp{
+  background:var(--bg3);border:1px solid var(--line);
+  border-radius:8px;padding:10px 14px;
+  font-size:12px;color:var(--g);
+  margin-bottom:16px;text-align:center;
+}
+</style>
+</head>
+<body>
+
+<div class="orb o1"></div>
+<div class="orb o2"></div>
+
+<div class="card">
+
+  <!-- Logo -->
+  <div class="logo">
+    <div style="display:flex;justify-content:center;margin-bottom:14px">
+      <div class="logo-box">M<div class="logo-ring"></div></div>
+    </div>
+    <h1>MANTHAN AI</h1>
+    <p>AI CODING ASSISTANT</p>
+  </div>
+
+  <!-- Steps -->
+  <div class="steps">
+    <div class="step done" id="s1"></div>
+    <div class="step" id="s2"></div>
+  </div>
+
+  <!-- Status -->
+  <div class="status" id="status-msg"></div>
+
+  <!-- PANEL 1: Email -->
+  <div class="panel show" id="panel-email">
+    <label class="lbl">EMAIL ADDRESS</label>
+    <input class="inp" type="email" id="email-inp" placeholder="your@email.com" autocomplete="email">
+    <button class="btn" id="send-btn" onclick="sendOTP()">📧 &nbsp;SEND OTP</button>
+  </div>
+
+  <!-- PANEL 2: OTP -->   
+  <div class="panel" id="panel-otp">
+    <label class="lbl">OTP SENT TO</label>
+    <div class="email-disp" id="email-display"></div>
+    <label class="lbl">ENTER 6-DIGIT OTP</label>
+    <div class="otp-row">
+      <input class="otp-inp" maxlength="1" id="o1" type="text" inputmode="numeric">
+      <input class="otp-inp" maxlength="1" id="o2" type="text" inputmode="numeric">
+      <input class="otp-inp" maxlength="1" id="o3" type="text" inputmode="numeric">
+      <input class="otp-inp" maxlength="1" id="o4" type="text" inputmode="numeric">
+      <input class="otp-inp" maxlength="1" id="o5" type="text" inputmode="numeric">
+      <input class="otp-inp" maxlength="1" id="o6" type="text" inputmode="numeric">
+    </div>
+    <button class="btn" id="verify-btn" onclick="verifyOTP()">✅ &nbsp;VERIFY & LOGIN</button>
+    <div class="resend">Didn't receive OTP? <span onclick="resendOTP()">Resend</span></div>
+  </div>
+
+</div>
+
+<script>
+// Auto login check
+if (localStorage.getItem('manthan_token') && localStorage.getItem('manthan_email')) {
+  window.location.href = '/dashboard';
+}
+
+let userEmail = '';
+
+function showStatus(msg, type) {
+  const el = document.getElementById('status-msg');
+  el.textContent = msg;
+  el.className = 'status ' + type;
+  el.style.display = 'block';
+  if (type === 'ok') setTimeout(() => el.style.display = 'none', 4000);
+}
+
+async function sendOTP() {
+  const email = document.getElementById('email-inp').value.trim();
+  if (!email || !email.includes('@')) { showStatus('Valid email dalo!', 'err'); return; }
+
+  const btn = document.getElementById('send-btn');
+  btn.disabled = true;
+  btn.textContent = '⏳  Sending...';
+
+  try {
+    const res = await fetch('/auth/send-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    const data = await res.json();
+
+    if (res.ok) {
+      userEmail = email;
+      document.getElementById('email-display').textContent = email;
+      document.getElementById('panel-email').classList.remove('show');
+      document.getElementById('panel-otp').classList.add('show');
+      document.getElementById('s2').classList.add('active');
+      document.getElementById('o1').focus();
+      showStatus('OTP sent! Check your inbox 📧', 'ok');
+    } else {
+      showStatus(data.detail || 'Error aaya!', 'err');
+      btn.disabled = false;
+      btn.textContent = '📧  SEND OTP';
+    }
+  } catch (e) {
+    showStatus('Could not connect to server! Is python main.py running?', 'err');
+    btn.disabled = false;
+    btn.textContent = '📧  SEND OTP';
+  }
+}
+
+async function verifyOTP() {
+  const otp = ['o1','o2','o3','o4','o5','o6'].map(id => document.getElementById(id).value).join('');
+  if (otp.length !== 6) { showStatus('Please enter the 6-digit OTP!', 'err'); return; }
+
+  const btn = document.getElementById('verify-btn');
+  btn.disabled = true;
+  btn.textContent = '⏳  Verifying...';
+
+  try {
+    const res = await fetch('/auth/verify-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: userEmail, otp })
+    });
+    const data = await res.json();
+
+    if (res.ok) {
+      document.getElementById('s2').classList.remove('active');
+      document.getElementById('s2').classList.add('done');
+      localStorage.setItem('manthan_token', data.token);
+      localStorage.setItem('manthan_email', userEmail);
+      showStatus('Login successful! Redirecting... 🎉', 'ok');
+      setTimeout(() => window.location.href = '/chat', 1500);
+    } else {
+      showStatus(data.detail || 'Galat OTP!', 'err');
+      btn.disabled = false;
+      btn.textContent = '✅  VERIFY & LOGIN';
+    }
+  } catch (e) {
+    showStatus('Server error!', 'err');
+    btn.disabled = false;
+    btn.textContent = '✅  VERIFY & LOGIN';
+  }
+}
+
+async function resendOTP() {
+  if (!userEmail) return;
+  showStatus('Resending OTP...', 'ok');
+  await fetch('/auth/send-otp', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: userEmail })
+  });
+  showStatus('OTP resent successfully!', 'ok');
+}
+
+// OTP auto-focus next input
+['o1','o2','o3','o4','o5','o6'].forEach((id, i, arr) => {
+  const el = document.getElementById(id);
+  el.addEventListener('input', () => {
+    if (el.value && i < arr.length - 1) document.getElementById(arr[i+1]).focus();
+    if (el.value.length > 1) el.value = el.value.slice(-1);
+    // Auto verify when all filled
+    const otp = arr.map(x => document.getElementById(x).value).join('');
+    if (otp.length === 6) verifyOTP();
+  });
+  el.addEventListener('keydown', e => {
+    if (e.key === 'Backspace' && !el.value && i > 0) document.getElementById(arr[i-1]).focus();
+  });
+});
+
+// Enter key
+document.getElementById('email-inp').addEventListener('keydown', e => {
+  if (e.key === 'Enter') sendOTP();
+});
+</script>
+</body>
+</html>

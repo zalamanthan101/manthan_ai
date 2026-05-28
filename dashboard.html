@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manthan AI — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Cabinet+Grotesk:wght@400;500;700;800&family=JetBrains+Mono:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box}
+
+:root{
+  --ink:      #03030a;
+  --ink1:     #07071a;
+  --ink2:     #0c0c24;
+  --ink3:     #12122e;
+  --ink4:     #191938;
+  --wire:     #1f1f48;
+  --wire2:    #2a2a5c;
+  --lime:     #b8ff57;
+  --lime2:    #96e63a;
+  --cyan:     #40e0ff;
+  --violet:   #9b59ff;
+  --rose:     #ff4f8b;
+  --amber:    #ffb93e;
+  --txt:      #f0f0ff;
+  --txt2:     #8888bb;
+  --txt3:     #4444aa;
+}
+
+html{scroll-behavior:smooth}
+::-webkit-scrollbar{width:2px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--wire);border-radius:2px}
+
+body{
+  font-family:'Plus Jakarta Sans',sans-serif;
+  background:var(--ink);
+  color:var(--txt);
+  min-height:100vh;
+  cursor:default;
+}
+
+/* ═══════════════════════════
+   CANVAS BACKGROUND
+═══════════════════════════ */
+#canvas-bg{
+  position:fixed;inset:0;z-index:0;
+  pointer-events:none;
+}
+.noise{
+  position:fixed;inset:0;z-index:0;
+  opacity:0.025;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  pointer-events:none;
+}
+
+/* ═══════════════════════════
+   NAVBAR
+═══════════════════════════ */
+nav{
+  position:sticky;top:0;z-index:200;
+  height:58px;
+  display:flex;align-items:center;
+  padding:0 36px;
+  background:rgba(3,3,10,0.75);
+  backdrop-filter:blur(24px) saturate(180%);
+  border-bottom:1px solid rgba(255,255,255,0.05);
+}
+.n-brand{
+  display:flex;align-items:center;gap:10px;
+  text-decoration:none;
+}
+.n-logo{
+  width:30px;height:30px;
+  border-radius:8px;
+  background:var(--lime);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Mono',monospace;
+  font-size:13px;font-weight:500;color:#000;
+  box-shadow:0 0 24px rgba(184,255,87,0.4);
+  flex-shrink:0;
+}
+.n-title{
+  font-family:'Syne',sans-serif;
+  font-size:14px;font-weight:800;
+  color:var(--txt);letter-spacing:0.5px;
+}
+.n-ver{
+  font-size:9px;color:var(--txt3);
+  font-family:'DM Mono',monospace;
+  padding:2px 6px;
+  border:1px solid var(--wire);
+  border-radius:3px;
+  letter-spacing:1px;
+}
+.n-right{
+  margin-left:auto;
+  display:flex;align-items:center;gap:8px;
+}
+.n-email{
+  font-family:'DM Mono',monospace;
+  font-size:10px;color:var(--txt3);
+  padding:5px 10px;
+  border:1px solid var(--wire);
+  border-radius:6px;
+  background:var(--ink1);
+  max-width:200px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.n-btn{
+  display:flex;align-items:center;gap:6px;
+  padding:7px 14px;border-radius:8px;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:11px;font-weight:600;
+  cursor:pointer;border:none;
+  transition:all 0.18s;letter-spacing:0.3px;
+}
+.nb-primary{
+  background:var(--lime);color:#000;
+  box-shadow:0 0 0 rgba(184,255,87,0);
+}
+.nb-primary:hover{
+  background:var(--lime2);
+  box-shadow:0 0 20px rgba(184,255,87,0.3);
+  transform:translateY(-1px);
+}
+.nb-ghost{
+  background:transparent;
+  color:var(--txt2);
+  border:1px solid var(--wire);
+}
+.nb-ghost:hover{border-color:var(--rose);color:var(--rose)}
+
+/* ═══════════════════════════
+   LAYOUT
+═══════════════════════════ */
+.wrap{
+  position:relative;z-index:1;
+  max-width:1120px;margin:0 auto;
+  padding:48px 36px 100px;
+}
+
+/* ═══════════════════════════
+   HERO
+═══════════════════════════ */
+.hero{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:24px;align-items:center;
+  margin-bottom:56px;
+  padding-bottom:56px;
+  border-bottom:1px solid var(--wire);
+}
+.hero-eyebrow{
+  display:flex;align-items:center;gap:10px;
+  margin-bottom:14px;
+}
+.hero-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--lime);
+  box-shadow:0 0 10px var(--lime);
+  animation:glow 2s ease-in-out infinite;
+}
+@keyframes glow{
+  0%,100%{box-shadow:0 0 10px var(--lime);opacity:1}
+  50%{box-shadow:0 0 4px var(--lime);opacity:0.6}
+}
+.hero-eyebrow-txt{
+  font-family:'DM Mono',monospace;
+  font-size:10px;color:var(--lime);
+  letter-spacing:3px;text-transform:uppercase;
+}
+.hero-name{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(32px,5vw,52px);
+  font-weight:800;
+  line-height:1.05;
+  margin-bottom:10px;
+  letter-spacing:-1px;
+}
+.hero-name .hl{
+  position:relative;
+  display:inline-block;
+}
+.hero-name .hl::after{
+  content:attr(data-text);
+  position:absolute;inset:0;
+  background:linear-gradient(90deg,var(--lime),var(--cyan));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.hero-sub{
+  font-size:13px;color:var(--txt2);
+  line-height:1.7;
+  max-width:480px;
+}
+.hero-panel{
+  background:var(--ink2);
+  border:1px solid var(--wire);
+  border-radius:16px;
+  padding:20px 24px;
+  min-width:220px;
+}
+.hp-row{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:14px;
+}
+.hp-row:last-child{margin-bottom:0}
+.hp-label{
+  font-size:10px;color:var(--txt3);
+  letter-spacing:1px;text-transform:uppercase;
+  font-family:'DM Mono',monospace;
+}
+.hp-val{
+  font-family:'DM Mono',monospace;
+  font-size:12px;
+}
+.hp-status{
+  display:flex;align-items:center;gap:5px;
+  color:var(--lime);
+}
+.hp-divider{height:1px;background:var(--wire);margin:12px 0}
+
+/* ═══════════════════════════
+   SECTION HEADER
+═══════════════════════════ */
+.sh{
+  display:flex;align-items:baseline;gap:14px;
+  margin-bottom:20px;
+}
+.sh-title{
+  font-family:'Syne',sans-serif;
+  font-size:11px;font-weight:700;
+  color:var(--txt2);
+  letter-spacing:3px;text-transform:uppercase;
+}
+.sh-line{flex:1;height:1px;background:var(--wire);margin-top:2px}
+.sh-count{
+  font-family:'DM Mono',monospace;
+  font-size:10px;color:var(--txt3);
+}
+
+/* ═══════════════════════════
+   STATS
+═══════════════════════════ */
+.stats{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:10px;
+  margin-bottom:56px;
+}
+@media(max-width:800px){.stats{grid-template-columns:repeat(2,1fr)}}
+
+.stat{
+  background:var(--ink2);
+  border:1px solid var(--wire);
+  border-radius:14px;
+  padding:20px;
+  position:relative;overflow:hidden;
+  transition:all 0.2s;
+  animation:rise 0.5s ease-out both;
+}
+.stat:hover{
+  border-color:var(--wire2);
+  transform:translateY(-3px);
+  background:var(--ink3);
+}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+.stat-glow{
+  position:absolute;
+  width:80px;height:80px;
+  border-radius:50%;
+  filter:blur(40px);
+  top:-20px;right:-20px;
+  opacity:0.3;
+  transition:opacity 0.3s;
+}
+.stat:hover .stat-glow{opacity:0.5}
+
+.stat-icon{
+  font-size:20px;
+  margin-bottom:16px;
+  display:block;
+}
+.stat-num{
+  font-family:'Syne',sans-serif;
+  font-size:30px;font-weight:800;
+  line-height:1;
+  margin-bottom:5px;
+}
+.stat-lbl{
+  font-size:9px;color:var(--txt3);
+  letter-spacing:2px;text-transform:uppercase;
+  font-family:'DM Mono',monospace;
+}
+
+/* ═══════════════════════════
+   MAIN GRID
+═══════════════════════════ */
+.grid-2{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+  margin-bottom:56px;
+}
+@media(max-width:768px){.grid-2{grid-template-columns:1fr}}
+
+/* ═══════════════════════════
+   FEATURE CARDS
+═══════════════════════════ */
+.feats{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin-bottom:56px;
+}
+@media(max-width:700px){.feats{grid-template-columns:repeat(2,1fr)}}
+
+.feat{
+  background:var(--ink2);
+  border:1px solid var(--wire);
+  border-radius:14px;
+  padding:18px;
+  text-decoration:none;color:inherit;
+  display:block;
+  transition:all 0.2s;
+  position:relative;overflow:hidden;
+  animation:rise 0.5s ease-out both;
+  group:true;
+}
+.feat::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:linear-gradient(135deg,var(--feat-c,var(--lime)) 0%,transparent 50%);
+  opacity:0;
+  transition:opacity 0.25s;
+  border-radius:14px;
+}
+.feat:hover::before{opacity:0.06}
+.feat:hover{
+  border-color:var(--feat-c,var(--lime));
+  transform:translateY(-3px);
+  box-shadow:0 8px 32px rgba(0,0,0,0.3);
+}
+.feat-head{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:12px;
+}
+.feat-ico{
+  width:36px;height:36px;
+  border-radius:9px;
+  background:var(--ink4);
+  border:1px solid var(--wire);
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;
+  transition:border-color 0.2s;
+}
+.feat:hover .feat-ico{border-color:var(--feat-c,var(--lime))}
+.feat-arr{
+  font-size:12px;color:var(--txt3);
+  transition:all 0.2s;
+}
+.feat:hover .feat-arr{
+  color:var(--feat-c,var(--lime));
+  transform:translate(3px,-3px);
+}
+.feat-name{
+  font-size:12px;font-weight:600;
+  margin-bottom:4px;color:var(--txt);
+}
+.feat-desc{
+  font-size:10px;color:var(--txt2);
+  line-height:1.6;
+}
+.feat-badge{
+  display:inline-block;margin-top:10px;
+  padding:2px 7px;
+  background:var(--ink4);
+  border:1px solid var(--wire);
+  border-radius:3px;
+  font-size:8px;color:var(--txt3);
+  font-family:'DM Mono',monospace;
+  letter-spacing:1px;
+  text-transform:uppercase;
+}
+
+/* ═══════════════════════════
+   ACTIVITY PANEL
+═══════════════════════════ */
+.panel{
+  background:var(--ink2);
+  border:1px solid var(--wire);
+  border-radius:16px;
+  overflow:hidden;
+  animation:rise 0.5s ease-out both;
+}
+.panel-hdr{
+  padding:14px 20px;
+  border-bottom:1px solid var(--wire);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.panel-title{
+  font-size:11px;color:var(--txt2);
+  font-family:'DM Mono',monospace;
+  letter-spacing:2px;text-transform:uppercase;
+}
+.panel-badge{
+  padding:2px 10px;
+  background:var(--ink4);
+  border:1px solid var(--wire);
+  border-radius:20px;
+  font-size:9px;
+  font-family:'DM Mono',monospace;
+  color:var(--lime);
+}
+.act-item{
+  display:flex;align-items:center;gap:14px;
+  padding:12px 20px;
+  border-bottom:1px solid rgba(255,255,255,0.03);
+  transition:background 0.15s;
+}
+.act-item:last-child{border-bottom:none}
+.act-item:hover{background:var(--ink3)}
+.act-pip{
+  width:5px;height:5px;border-radius:50%;flex-shrink:0;
+}
+.act-type{
+  font-size:9px;
+  font-family:'DM Mono',monospace;
+  letter-spacing:1px;text-transform:uppercase;
+  color:var(--txt3);
+  min-width:58px;flex-shrink:0;
+}
+.act-text{
+  flex:1;font-size:11px;color:var(--txt2);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.act-t{
+  font-size:9px;color:var(--txt3);
+  font-family:'DM Mono',monospace;flex-shrink:0;
+}
+.empty-act{
+  padding:56px 24px;
+  text-align:center;
+}
+.empty-act .e-icon{font-size:32px;opacity:0.3;display:block;margin-bottom:10px}
+.empty-act .e-t{font-size:12px;color:var(--txt3)}
+.empty-act .e-s{font-size:10px;color:var(--txt3);opacity:0.6;margin-top:4px}
+
+/* ═══════════════════════════
+   QUICK LAUNCH
+═══════════════════════════ */
+.launch-grid{
+  display:flex;gap:8px;flex-wrap:wrap;
+  margin-bottom:56px;
+}
+.lbtn{
+  display:flex;align-items:center;gap:7px;
+  padding:9px 16px;
+  background:var(--ink2);
+  border:1px solid var(--wire);
+  border-radius:9px;
+  font-size:11px;font-weight:500;
+  color:var(--txt2);
+  cursor:pointer;text-decoration:none;
+  transition:all 0.18s;
+}
+.lbtn:hover{
+  background:var(--ink3);
+  border-color:var(--lime);
+  color:var(--lime);
+  transform:translateY(-2px);
+}
+.lbtn-ico{font-size:13px}
+
+/* ═══════════════════════════
+   ANIMATED NUMBER
+═══════════════════════════ */
+.counting{transition:all 0.1s}
+</style>
+</head>
+<body>
+
+<canvas id="canvas-bg"></canvas>
+<div class="noise"></div>
+
+<!-- ── NAVBAR ── -->
+<nav>
+  <div class="n-brand">
+    <div class="n-logo">M</div>
+    <span class="n-title">Manthan AI</span>
+    <span class="n-ver">v3.0</span>
+  </div>
+  <div class="n-right">
+    <span class="n-email" id="nav-email">—</span>
+    <button class="n-btn nb-primary" onclick="window.location.href='/chat'">🚀 Launch Chat</button>
+    <button class="n-btn nb-ghost" onclick="doLogout()">Logout</button>
+  </div>
+</nav>
+
+<!-- ── MAIN ── -->
+<div class="wrap">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div>
+      <div class="hero-eyebrow">
+        <div class="hero-dot"></div>
+        <span class="hero-eyebrow-txt">Developer Dashboard</span>
+      </div>
+      <div class="hero-name">
+        Good to see you,<br>
+        <span class="hl" data-text="" id="hero-name-hl">—</span>
+      </div>
+      <p class="hero-sub">Your AI coding engine is online and ready. Pick up where you left off or start something new.</p>
+    </div>
+    <div class="hero-panel">
+      <div class="hp-row">
+        <span class="hp-label">Status</span>
+        <span class="hp-val hp-status"><span class="hero-dot" style="width:5px;height:5px"></span>Online</span>
+      </div>
+      <div class="hp-divider"></div>
+      <div class="hp-row">
+        <span class="hp-label">Model</span>
+        <span class="hp-val" style="color:var(--cyan);font-size:10px">Groq LLaMA3</span>
+      </div>
+      <div class="hp-row">
+        <span class="hp-label">Fallback</span>
+        <span class="hp-val" style="color:var(--violet);font-size:10px">Gemini Flash</span>
+      </div>
+      <div class="hp-divider"></div>
+      <div class="hp-row">
+        <span class="hp-label">Session</span>
+        <span class="hp-val" style="color:var(--amber);font-size:10px" id="session-time">Active</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="sh">
+    <span class="sh-title">Overview</span>
+    <div class="sh-line"></div>
+  </div>
+  <div class="stats">
+    <div class="stat" style="animation-delay:0.04s">
+      <div class="stat-glow" style="background:var(--lime)"></div>
+      <span class="stat-icon">💬</span>
+      <div class="stat-num counting" id="s-chats" style="color:var(--lime)">0</div>
+      <div class="stat-lbl">Chats</div>
+    </div>
+    <div class="stat" style="animation-delay:0.08s">
+      <div class="stat-glow" style="background:var(--rose)"></div>
+      <span class="stat-icon">🐛</span>
+      <div class="stat-num counting" id="s-bugs" style="color:var(--rose)">0</div>
+      <div class="stat-lbl">Bugs Fixed</div>
+    </div>
+    <div class="stat" style="animation-delay:0.12s">
+      <div class="stat-glow" style="background:var(--cyan)"></div>
+      <span class="stat-icon">💡</span>
+      <div class="stat-num counting" id="s-exp" style="color:var(--cyan)">0</div>
+      <div class="stat-lbl">Explained</div>
+    </div>
+    <div class="stat" style="animation-delay:0.16s">
+      <div class="stat-glow" style="background:var(--amber)"></div>
+      <span class="stat-icon">📁</span>
+      <div class="stat-num counting" id="s-files" style="color:var(--amber)">0</div>
+      <div class="stat-lbl">Files</div>
+    </div>
+    <div class="stat" style="animation-delay:0.2s">
+      <div class="stat-glow" style="background:var(--violet)"></div>
+      <span class="stat-icon">▶</span>
+      <div class="stat-num counting" id="s-runs" style="color:var(--violet)">0</div>
+      <div class="stat-lbl">Runs</div>
+    </div>
+  </div>
+
+  <!-- QUICK LAUNCH -->
+  <div class="sh">
+    <span class="sh-title">Quick Launch</span>
+    <div class="sh-line"></div>
+  </div>
+  <div class="launch-grid">
+    <a href="/chat" class="lbtn"><span class="lbtn-ico">💬</span> New Chat</a>
+    <a href="/chat" class="lbtn"><span class="lbtn-ico">🐛</span> Fix Bug</a>
+    <a href="/chat" class="lbtn"><span class="lbtn-ico">💡</span> Explain Code</a>
+    <a href="/chat" class="lbtn"><span class="lbtn-ico">📁</span> Upload File</a>
+    <a href="/chat" class="lbtn"><span class="lbtn-ico">⚡</span> Enhance Code</a>
+    <a href="/chat" class="lbtn"><span class="lbtn-ico">✨</span> Generate Code</a>
+    <a href="/chat" class="lbtn"><span class="lbtn-ico">🔍</span> Review Code</a>
+  </div>
+
+  <!-- FEATURES -->
+  <div class="sh">
+    <span class="sh-title">Features</span>
+    <div class="sh-line"></div>
+  </div>
+  <div class="feats">
+    <a href="/chat" class="feat" style="--feat-c:var(--lime);animation-delay:0.04s">
+      <div class="feat-head"><div class="feat-ico">💬</div><span class="feat-arr">↗</span></div>
+      <div class="feat-name">AI Chat</div>
+      <div class="feat-desc">Ask anything about your code — get instant answers</div>
+      <span class="feat-badge">Groq · Gemini</span>
+    </a>
+    <a href="/chat" class="feat" style="--feat-c:var(--rose);animation-delay:0.08s">
+      <div class="feat-head"><div class="feat-ico">🐛</div><span class="feat-arr">↗</span></div>
+      <div class="feat-name">Bug Fixer</div>
+      <div class="feat-desc">Paste buggy code — AI finds and fixes issues instantly</div>
+      <span class="feat-badge">AI Powered</span>
+    </a>
+    <a href="/chat" class="feat" style="--feat-c:var(--cyan);animation-delay:0.12s">
+      <div class="feat-head"><div class="feat-ico">💡</div><span class="feat-arr">↗</span></div>
+      <div class="feat-name">Code Explain</div>
+      <div class="feat-desc">Understand any complex code in simple clear terms</div>
+      <span class="feat-badge">Step by Step</span>
+    </a>
+    <a href="/chat" class="feat" style="--feat-c:var(--amber);animation-delay:0.16s">
+      <div class="feat-head"><div class="feat-ico">📁</div><span class="feat-arr">↗</span></div>
+      <div class="feat-name">File Upload</div>
+      <div class="feat-desc">Upload ZIP or any file — AI analyzes your entire project</div>
+      <span class="feat-badge">ZIP Support</span>
+    </a>
+    <a href="/chat" class="feat" style="--feat-c:var(--violet);animation-delay:0.2s">
+      <div class="feat-head"><div class="feat-ico">⚡</div><span class="feat-arr">↗</span></div>
+      <div class="feat-name">Enhance</div>
+      <div class="feat-desc">Make slow messy code fast, clean and production-ready</div>
+      <span class="feat-badge">Optimize</span>
+    </a>
+    <a href="/chat" class="feat" style="--feat-c:#ff9d57;animation-delay:0.24s">
+      <div class="feat-head"><div class="feat-ico">✨</div><span class="feat-arr">↗</span></div>
+      <div class="feat-name">Generate</div>
+      <div class="feat-desc">Describe what you want — AI writes the code for you</div>
+      <span class="feat-badge">Any Language</span>
+    </a>
+  </div>
+
+  <!-- ACTIVITY -->
+  <div class="sh">
+    <span class="sh-title">Recent Activity</span>
+    <div class="sh-line"></div>
+    <span class="sh-count" id="act-count">0 entries</span>
+  </div>
+  <div class="panel">
+    <div class="panel-hdr">
+      <span class="panel-title">Session Log</span>
+      <span class="panel-badge" id="panel-badge">0 entries</span>
+    </div>
+    <div id="act-list">
+      <div class="empty-act">
+        <span class="e-icon">📡</span>
+        <div class="e-t">No activity recorded yet</div>
+        <div class="e-s">Start chatting to see your session log here</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── Auth ──────────────────────────────────
+const token = localStorage.getItem('manthan_token');
+const email = localStorage.getItem('manthan_email');
+if (!token || !email) { window.location.replace('/login'); }
+
+// ── Canvas Background ─────────────────────
+const canvas = document.getElementById('canvas-bg');
+const ctx = canvas.getContext('2d');
+let W, H, particles = [];
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+class Particle {
+  constructor() { this.reset(); }
+  reset() {
+    this.x = Math.random() * W;
+    this.y = Math.random() * H;
+    this.size = Math.random() * 1.5 + 0.3;
+    this.speed = Math.random() * 0.3 + 0.1;
+    this.opacity = Math.random() * 0.4 + 0.1;
+    this.color = ['#b8ff57','#40e0ff','#9b59ff'][Math.floor(Math.random()*3)];
+  }
+  update() {
+    this.y -= this.speed;
+    this.opacity -= 0.0008;
+    if (this.y < 0 || this.opacity <= 0) this.reset();
+  }
+  draw() {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.fillStyle = this.color + Math.floor(this.opacity * 255).toString(16).padStart(2,'0');
+    ctx.fill();
+  }
+}
+
+for (let i = 0; i < 80; i++) particles.push(new Particle());
+
+function animate() {
+  ctx.clearRect(0, 0, W, H);
+  particles.forEach(p => { p.update(); p.draw(); });
+  requestAnimationFrame(animate);
+}
+animate();
+
+// ── User Info ─────────────────────────────
+document.getElementById('nav-email').textContent = email;
+const uname = email.split('@')[0];
+const dname = uname.charAt(0).toUpperCase() + uname.slice(1);
+const hlEl = document.getElementById('hero-name-hl');
+hlEl.textContent = dname;
+hlEl.setAttribute('data-text', dname);
+
+// Session time
+const sessionStart = Date.now();
+setInterval(() => {
+  const mins = Math.floor((Date.now() - sessionStart) / 60000);
+  document.getElementById('session-time').textContent = mins < 1 ? 'Just started' : `${mins}m active`;
+}, 10000);
+
+// ── Animated Counter ──────────────────────
+function countUp(el, target) {
+  if (!target) return;
+  let start = 0;
+  const dur = 1400;
+  const t0 = performance.now();
+  const step = t => {
+    const p = Math.min((t - t0) / dur, 1);
+    const ease = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.round(ease * target);
+    if (p < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+const stats = JSON.parse(localStorage.getItem('manthan_stats_' + email) || '{}');
+setTimeout(() => {
+  countUp(document.getElementById('s-chats'), stats.chats || 0);
+  countUp(document.getElementById('s-bugs'),  stats.bugs  || 0);
+  countUp(document.getElementById('s-exp'),   stats.explained || 0);
+  countUp(document.getElementById('s-files'), stats.files || 0);
+  countUp(document.getElementById('s-runs'),  stats.runs  || 0);
+}, 300);
+
+// ── Activity ──────────────────────────────
+const activity = JSON.parse(localStorage.getItem('manthan_activity_' + email) || '[]');
+const actList  = document.getElementById('act-list');
+const cnt = activity.length;
+
+document.getElementById('act-count').textContent = cnt + ' entries';
+document.getElementById('panel-badge').textContent = cnt + ' entries';
+
+if (cnt > 0) {
+  const colors = {
+    chat:'#b8ff57', fix:'#ff4f8b', explain:'#40e0ff',
+    enhance:'#9b59ff', generate:'#ffb93e', review:'#ff9d57'
+  };
+  actList.innerHTML = '';
+  activity.slice(-12).reverse().forEach((item, i) => {
+    const c = colors[item.task] || '#b8ff57';
+    const row = document.createElement('div');
+    row.className = 'act-item';
+    row.style.animationDelay = (i * 0.03) + 's';
+    row.innerHTML = `
+      <div class="act-pip" style="background:${c};box-shadow:0 0 5px ${c}"></div>
+      <div class="act-type">${item.task || 'chat'}</div>
+      <div class="act-text">${(item.message || '—').substring(0,90)}</div>
+      <div class="act-t">${item.time || '—'}</div>
+    `;
+    actList.appendChild(row);
+  });
+}
+
+// ── Logout ────────────────────────────────
+function doLogout() {
+  const t = localStorage.getItem('manthan_token');
+  if (t) {
+    fetch('/api/auth/logout', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({token:t})
+    }).catch(()=>{});
+  }
+  localStorage.removeItem('manthan_token');
+  localStorage.removeItem('manthan_email');
+  window.location.replace('/login');
+}
+</script>
+</body>
+</html>

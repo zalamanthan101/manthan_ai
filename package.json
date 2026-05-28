@@ -1,0 +1,66 @@
+{
+  "name": "manthan-ai",
+  "displayName": "Manthan AI",
+  "description": "AI Coding Assistant for Indian Developers",
+  "version": "0.0.1",
+  "engines": { "vscode": "^1.80.0" },
+  "categories": ["Other"],
+  "main": "./extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "manthan-ai-explorer",
+          "title": "Manthan AI",
+          "icon": "$(hubot)"
+        }
+      ]
+    },
+    "views": {
+      "manthan-ai-explorer": [
+        {
+          "type": "webview",
+          "id": "manthan-ai-sidebar",
+          "name": "Chat with Manthan AI"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "manthan.fixBug",
+        "title": "🐛 Fix with Manthan AI"
+      },
+      {
+        "command": "manthan.explain",
+        "title": "💡 Explain with Manthan AI"
+      },
+      {
+        "command": "manthan.enhance",
+        "title": "⚡ Enhance with Manthan AI"
+      },
+      {
+        "command": "manthan.openChat",
+        "title": "💬 Open Manthan AI Chat"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "manthan.fixBug",
+          "group": "manthan@1",
+          "when": "editorHasSelection"
+        },
+        {
+          "command": "manthan.explain",
+          "group": "manthan@2",
+          "when": "editorHasSelection"
+        },
+        {
+          "command": "manthan.enhance",
+          "group": "manthan@3",
+          "when": "editorHasSelection"
+        }
+      ]
+    }
+  }
+}
