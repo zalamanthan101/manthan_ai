@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+python-multipart
+razorpay
+sqlalchemy
+psycopg2-binary
+google-generativeai
+groq
+python-dotenv
